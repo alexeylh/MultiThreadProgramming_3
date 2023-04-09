@@ -14,17 +14,55 @@ class Main {
         counter4 = new AtomicInteger(0);
         counter5 = new AtomicInteger(0);
 
-        Thread thread3 = new Thread(new Counter(texts, 3, counter3));
-        Thread thread4 = new Thread(new Counter(texts, 4, counter4));
-        Thread thread5 = new Thread(new Counter(texts, 5, counter5));
+        Thread threadPalindrom = new Thread(() -> {
+            for (int i = 0; i < texts.length; i++) {
+                // строка является палиндромом?
+                String reversedString = new StringBuffer(texts[i]).reverse().toString();
+                if (texts[i].equals(reversedString)) {
+                    Main.counterIncrement(texts[i].length());
+                }
+            }
+        });
+        Thread threadOneSimbol = new Thread(() -> {
+            for (int i = 0; i < texts.length; i++) {
+                // строка содержит только один уникальный символ?
+                char first = texts[i].charAt(0);
+                int j;
+                for (j = 1; j < texts[i].length(); j++) {
+                    if (texts[i].charAt(j) != first) {
+                        break;
+                    }
+                }
+                if (j == texts[i].length()) { // вся строка пройдена - проверка прошла успешно
+                    Main.counterIncrement(texts[i].length());
+                }
+            }
+        });
+        Thread threadOrdered = new Thread(() -> {
+            for (int i = 0; i < texts.length; i++) {
+                // символы идут в не убывающем порядке?
+                char prev = texts[i].charAt(0);
+                int j;
+                for (j = 1; j < texts[i].length(); j++) {
+                    char current = texts[i].charAt(j);
+                    if (current < prev) {
+                        break;
+                    }
+                    prev = current;
+                }
+                if (j == texts[i].length()) { // вся строка пройдена - проверка прошла успешно
+                    Main.counterIncrement(texts[i].length());
+                }
+            }
+        });
 
-        thread3.start();
-        thread4.start();
-        thread5.start();
+        threadPalindrom.start();
+        threadOneSimbol.start();
+        threadOrdered.start();
 
-        thread3.join();
-        thread4.join();
-        thread5.join();
+        threadPalindrom.join();
+        threadOneSimbol.join();
+        threadOrdered.join();
 
         System.out.println("Красивых слов с длиной 3: " + counter3);
         System.out.println("Красивых слов с длиной 4: " + counter4);
@@ -38,5 +76,19 @@ class Main {
             text.append(letters.charAt(random.nextInt(letters.length())));
         }
         return text.toString();
+    }
+
+    public static void counterIncrement(int len) {
+        switch (len) {
+            case 3:
+                counter3.incrementAndGet();
+                break;
+            case 4:
+                counter4.incrementAndGet();
+                break;
+            case 5:
+                counter5.incrementAndGet();
+                break;
+        }
     }
 }
